@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { blogService } from "@/lib/blog-service";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/ImageUpload";
 import { PenTool, Send, X } from "lucide-react";
 
 const WriteBlog = () => {
@@ -21,6 +22,7 @@ const WriteBlog = () => {
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [author, setAuthor] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const addTag = () => {
@@ -77,12 +79,19 @@ const WriteBlog = () => {
     setIsPublishing(true);
     
     try {
+      // Add images to content if any are uploaded
+      let finalContent = content.trim();
+      if (images.length > 0) {
+        const imageMarkdown = images.map(url => `![Blog Image](${url})`).join('\n\n');
+        finalContent = `${finalContent}\n\n${imageMarkdown}`;
+      }
+
       const blog = await blogService.addBlog({
         title: title.trim(),
-        content: content.trim(),
+        content: finalContent,
         excerpt: generateExcerpt(content),
         author: author.trim(),
-        read_time: calculateReadTime(content),
+        read_time: calculateReadTime(finalContent),
         tags: tags,
       });
 
@@ -195,6 +204,11 @@ const WriteBlog = () => {
                   Supports Markdown syntax. Estimated read time: {calculateReadTime(content)} minute{calculateReadTime(content) !== 1 ? 's' : ''}
                 </p>
               </div>
+
+              <ImageUpload 
+                onImagesUploaded={setImages}
+                maxImages={5}
+              />
 
               <div className="flex justify-end space-x-4">
                 <Button 

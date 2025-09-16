@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/ui/navigation";
 import { blogService } from "@/lib/blog-service";
+import { SocialShare } from "@/components/SocialShare";
+import { Footer } from "@/components/Footer";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
@@ -75,7 +77,7 @@ const BlogPost = () => {
   };
 
   const renderMarkdown = (content: string) => {
-    // Simple markdown rendering for demo
+    // Simple markdown rendering for demo with image support
     return content
       .split('\n')
       .map((line, index) => {
@@ -100,6 +102,21 @@ const BlogPost = () => {
               )}
             </p>
           );
+        }
+        // Image markdown support
+        if (line.match(/!\[.*\]\(.*\)/)) {
+          const match = line.match(/!\[(.*)\]\((.*)\)/);
+          if (match) {
+            return (
+              <div key={index} className="my-6">
+                <img 
+                  src={match[2]} 
+                  alt={match[1]} 
+                  className="w-full max-w-2xl mx-auto rounded-lg shadow-md"
+                />
+              </div>
+            );
+          }
         }
         if (line.trim() === '') {
           return <br key={index} />;
@@ -164,6 +181,15 @@ const BlogPost = () => {
             </div>
           </article>
 
+          {/* Social Share */}
+          <div className="mt-8">
+            <SocialShare 
+              title={blog.title}
+              url={window.location.href}
+              excerpt={blog.excerpt}
+            />
+          </div>
+
           {/* Footer */}
           <div className="mt-12 pt-8 border-t border-border">
             <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
@@ -188,6 +214,7 @@ const BlogPost = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
