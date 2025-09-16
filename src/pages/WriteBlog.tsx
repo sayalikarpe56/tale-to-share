@@ -7,13 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/ui/navigation";
 import { Textarea } from "@/components/ui/textarea";
-import { blogStore } from "@/lib/blog-store";
+import { blogService } from "@/lib/blog-service";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { PenTool, Send, X } from "lucide-react";
 
 const WriteBlog = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tagInput, setTagInput] = useState("");
@@ -53,6 +55,16 @@ const WriteBlog = () => {
   };
 
   const handlePublish = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to publish a blog post.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
     if (!title.trim() || !content.trim() || !author.trim()) {
       toast({
         title: "Missing Information",
@@ -65,21 +77,22 @@ const WriteBlog = () => {
     setIsPublishing(true);
     
     try {
-      const blog = blogStore.addBlog({
+      const blog = await blogService.addBlog({
         title: title.trim(),
         content: content.trim(),
         excerpt: generateExcerpt(content),
         author: author.trim(),
-        readTime: calculateReadTime(content),
+        read_time: calculateReadTime(content),
         tags: tags,
       });
 
-      toast({
-        title: "Blog Published!",
-        description: "Your blog post has been published successfully.",
-      });
-
-      navigate(`/blog/${blog.id}`);
+      if (blog) {
+        toast({
+          title: "Blog Published!",
+          description: "Your blog post has been published successfully.",
+        });
+        navigate(`/blog/${blog.id}`);
+      }
     } catch (error) {
       toast({
         title: "Error",

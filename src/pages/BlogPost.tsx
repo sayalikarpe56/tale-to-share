@@ -2,15 +2,51 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/ui/navigation";
-import { blogStore } from "@/lib/blog-store";
+import { blogService } from "@/lib/blog-service";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import { format } from "date-fns";
+import { useState, useEffect } from "react";
+import { BlogPost as BlogPostType } from "@/types/blog";
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  const blog = id ? blogStore.getBlog(id) : null;
+  const [blog, setBlog] = useState<BlogPostType | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadBlog = async () => {
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const fetchedBlog = await blogService.getBlog(id);
+        setBlog(fetchedBlog);
+      } catch (error) {
+        console.error('Error loading blog:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBlog();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="pt-24 pb-16">
+          <div className="container mx-auto px-4 text-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading blog post...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!blog) {
     return (

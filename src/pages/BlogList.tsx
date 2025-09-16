@@ -2,12 +2,30 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/ui/navigation";
-import { blogStore } from "@/lib/blog-store";
+import { blogService } from "@/lib/blog-service";
 import { Clock, User, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useState, useEffect } from "react";
+import { BlogPost } from "@/types/blog";
 
 const BlogList = () => {
-  const blogs = blogStore.getBlogs();
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadBlogs = async () => {
+      try {
+        const fetchedBlogs = await blogService.getBlogs();
+        setBlogs(fetchedBlogs);
+      } catch (error) {
+        console.error('Error loading blogs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBlogs();
+  }, []);
 
   const formatDate = (date: Date) => {
     return format(date, "MMM dd, yyyy");
@@ -31,7 +49,12 @@ const BlogList = () => {
             </p>
           </div>
 
-          {blogs.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading blogs...</p>
+            </div>
+          ) : blogs.length === 0 ? (
             <div className="text-center py-16">
               <h3 className="text-2xl font-semibold mb-4">No blogs yet</h3>
               <p className="text-muted-foreground mb-8">Be the first to share your story!</p>
