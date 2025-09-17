@@ -50,6 +50,18 @@ export const Navigation = () => {
 
           {user ? (
             <>
+              <Link 
+                to="/profile" 
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                  location.pathname === "/profile" 
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>Profile</span>
+              </Link>
+
               <Button asChild variant="hero">
                 <Link to="/write">
                   <PenTool className="w-4 h-4 mr-2" />
@@ -57,16 +69,10 @@ export const Navigation = () => {
                 </Link>
               </Button>
               
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-muted-foreground flex items-center">
-                  <User className="w-4 h-4 mr-1" />
-                  {user.email}
-                </span>
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-              </div>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
             </>
           ) : (
             <Button asChild variant="outline">

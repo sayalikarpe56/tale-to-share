@@ -10,6 +10,7 @@ import BlogList from "./pages/BlogList";
 import WriteBlog from "./pages/WriteBlog";
 import BlogPost from "./pages/BlogPost";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
                 <Route path="/write" element={<WriteBlog />} />
                 <Route path="/blog/:id" element={<BlogPost />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
