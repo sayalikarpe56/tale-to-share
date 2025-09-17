@@ -10,13 +10,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Edit3, Trash2, Eye, Calendar } from "lucide-react";
+import { User, Edit3, Trash2, Eye, Calendar, BookOpen, Newspaper, Feather } from "lucide-react";
 import { blogService } from "@/lib/blog-service";
+import { contentService } from "@/lib/content-service";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost } from "@/types/blog";
+import { Content } from "@/types/content";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload";
 
 interface UserProfile {
   id: string;
@@ -32,6 +35,9 @@ const Profile = () => {
   const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userBlogs, setUserBlogs] = useState<BlogPost[]>([]);
+  const [userStories, setUserStories] = useState<Content[]>([]);
+  const [userArticles, setUserArticles] = useState<Content[]>([]);
+  const [userNews, setUserNews] = useState<Content[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -43,7 +49,7 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
-      fetchUserBlogs();
+      fetchUserContent();
     }
   }, [user]);
 
@@ -81,19 +87,20 @@ const Profile = () => {
     }
   };
 
-  const fetchUserBlogs = async () => {
+  const fetchUserContent = async () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch blogs
+      const { data: blogsData, error: blogsError } = await supabase
         .from('blogs')
         .select('*')
         .eq('user_id', user.id)
         .order('published_at', { ascending: false });
 
-      if (error) throw error;
+      if (blogsError) throw blogsError;
 
-      const blogs = data.map(blog => ({
+      const blogs = blogsData.map(blog => ({
         id: blog.id,
         title: blog.title,
         content: blog.content,
@@ -105,14 +112,29 @@ const Profile = () => {
       }));
 
       setUserBlogs(blogs);
+
+      // Fetch all content types
+      const [stories, articles, news] = await Promise.all([
+        contentService.getUserContent(user.id, 'story'),
+        contentService.getUserContent(user.id, 'article'),
+        contentService.getUserContent(user.id, 'news')
+      ]);
+
+      setUserStories(stories);
+      setUserArticles(articles);
+      setUserNews(news);
     } catch (error) {
-      console.error('Error fetching user blogs:', error);
+      console.error('Error fetching user content:', error);
       toast({
         title: "Error",
-        description: "Failed to load your blogs.",
+        description: "Failed to load your content.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleAvatarUpdate = (url: string) => {
+    setProfile(prev => prev ? { ...prev, avatar_url: url } : null);
   };
 
   const updateProfile = async () => {
@@ -120,7 +142,6 @@ const Profile = () => {
 
     try {
       if (profile) {
-        // Update existing profile
         const { error } = await supabase
           .from('profiles')
           .update(formData)
@@ -128,7 +149,6 @@ const Profile = () => {
 
         if (error) throw error;
       } else {
-        // Create new profile
         const { error } = await supabase
           .from('profiles')
           .insert({
@@ -150,27 +170,6 @@ const Profile = () => {
       toast({
         title: "Error",
         description: "Failed to update profile.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const deleteBlog = async (blogId: string) => {
-    try {
-      const success = await blogService.deleteBlog(blogId);
-      if (success) {
-        setUserBlogs(prev => prev.filter(blog => blog.id !== blogId));
-        toast({
-          title: "Success",
-          description: "Blog deleted successfully.",
-        });
-      } else {
-        throw new Error("Failed to delete blog");
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete blog.",
         variant: "destructive",
       });
     }
@@ -218,9 +217,12 @@ const Profile = () => {
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-6xl mx-auto">
           <Tabs defaultValue="overview" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="blogs">My Blogs ({userBlogs.length})</TabsTrigger>
+              <TabsTrigger value="blogs">Blogs ({userBlogs.length})</TabsTrigger>
+              <TabsTrigger value="stories">Stories ({userStories.length})</TabsTrigger>
+              <TabsTrigger value="articles">Articles ({userArticles.length})</TabsTrigger>
+              <TabsTrigger value="news">News ({userNews.length})</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
@@ -254,16 +256,16 @@ const Profile = () => {
                 <Card>
                   <CardContent className="p-6 text-center">
                     <div className="text-3xl font-bold text-primary mb-2">
-                      {userBlogs.length}
+                      {userBlogs.length + userStories.length + userArticles.length + userNews.length}
                     </div>
-                    <p className="text-muted-foreground">Published Blogs</p>
+                    <p className="text-muted-foreground">Total Published</p>
                   </CardContent>
                 </Card>
                 
                 <Card>
                   <CardContent className="p-6 text-center">
                     <div className="text-3xl font-bold text-accent mb-2">
-                      {userBlogs.reduce((total, blog) => total + blog.readTime, 0)}
+                      {[...userBlogs, ...userStories, ...userArticles, ...userNews].reduce((total, item) => total + item.readTime, 0)}
                     </div>
                     <p className="text-muted-foreground">Total Read Time (min)</p>
                   </CardContent>
@@ -272,80 +274,12 @@ const Profile = () => {
                 <Card>
                   <CardContent className="p-6 text-center">
                     <div className="text-3xl font-bold text-primary-glow mb-2">
-                      {new Set(userBlogs.flatMap(blog => blog.tags)).size}
+                      {new Set([...userBlogs, ...userStories, ...userArticles, ...userNews].flatMap(item => item.tags)).size}
                     </div>
                     <p className="text-muted-foreground">Unique Tags Used</p>
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-
-            <TabsContent value="blogs" className="space-y-6">
-              {userBlogs.length === 0 ? (
-                <Card>
-                  <CardContent className="p-12 text-center">
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                      <Edit3 className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">No Blogs Yet</h3>
-                    <p className="text-muted-foreground mb-6">
-                      Start writing your first blog post to see it here.
-                    </p>
-                    <Button asChild variant="hero">
-                      <Link to="/write">Write Your First Blog</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-6">
-                  {userBlogs.map((blog) => (
-                    <Card key={blog.id} className="hover:shadow-lg transition-all duration-300">
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex-1">
-                            <h3 className="text-xl font-semibold mb-2 line-clamp-2">
-                              {blog.title}
-                            </h3>
-                            <p className="text-muted-foreground mb-3 line-clamp-2">
-                              {blog.excerpt}
-                            </p>
-                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                              <div className="flex items-center">
-                                <Calendar className="w-4 h-4 mr-1" />
-                                {format(blog.publishedAt, 'MMM d, yyyy')}
-                              </div>
-                              <div>{blog.readTime} min read</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2 ml-4">
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/blog/${blog.id}`}>
-                                <Eye className="w-4 h-4" />
-                              </Link>
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => deleteBlog(blog.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        {blog.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {blog.tags.map((tag, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
             </TabsContent>
 
             <TabsContent value="settings" className="space-y-6">
@@ -364,7 +298,18 @@ const Profile = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-4">
+                  <div className="space-y-6">
+                    <div className="flex justify-center">
+                      <ProfilePhotoUpload
+                        currentAvatarUrl={profile?.avatar_url}
+                        userName={profile?.full_name || user.email}
+                        userId={user.id}
+                        onAvatarUpdate={handleAvatarUpdate}
+                      />
+                    </div>
+
+                    <Separator />
+
                     <div>
                       <Label htmlFor="email">Email</Label>
                       <Input

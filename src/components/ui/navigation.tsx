@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./button";
-import { PenTool, Home, BookOpen, LogIn, LogOut, User } from "lucide-react";
+import { PenTool, Home, BookOpen, LogIn, LogOut, User, Feather, Newspaper } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Navigation = () => {
@@ -46,6 +46,42 @@ export const Navigation = () => {
           >
             <BookOpen className="w-4 h-4" />
             <span>Blogs</span>
+          </Link>
+
+          <Link 
+            to="/stories" 
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              location.pathname === "/stories" 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Feather className="w-4 h-4" />
+            <span>Stories</span>
+          </Link>
+
+          <Link 
+            to="/articles" 
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              location.pathname === "/articles" 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>Articles</span>
+          </Link>
+
+          <Link 
+            to="/news" 
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+              location.pathname === "/news" 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Newspaper className="w-4 h-4" />
+            <span>News</span>
           </Link>
 
           {user ? (
