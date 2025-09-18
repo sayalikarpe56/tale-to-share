@@ -5,7 +5,6 @@ export interface BlogCreate {
   title: string;
   content: string;
   excerpt: string;
-  author: string;
   read_time: number;
   tags: string[];
 }
@@ -71,6 +70,15 @@ export class BlogService {
         throw new Error('User must be authenticated to create a blog');
       }
 
+      // Get user's full name from profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const authorName = profile?.full_name || 'Anonymous';
+
       const { data, error } = await supabase
         .from('blogs')
         .insert({
@@ -78,7 +86,7 @@ export class BlogService {
           title: blog.title,
           content: blog.content,
           excerpt: blog.excerpt,
-          author: blog.author,
+          author: authorName,
           read_time: blog.read_time,
           tags: blog.tags
         })

@@ -13,7 +13,6 @@ export interface ContentFormData {
   title: string;
   content: string;
   excerpt: string;
-  author: string;
   tags: string[];
   read_time: number;
 }

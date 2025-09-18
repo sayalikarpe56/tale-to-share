@@ -49,7 +49,7 @@ const WriteContent = () => {
   const [content, setContent] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [author, setAuthor] = useState("");
+  
   const [images, setImages] = useState<string[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -95,10 +95,10 @@ const WriteContent = () => {
       return;
     }
 
-    if (!title.trim() || !content.trim() || !author.trim()) {
+    if (!title.trim() || !content.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in title, content, and author name.",
+        description: "Please fill in title and content.",
         variant: "destructive",
       });
       return;
@@ -118,7 +118,6 @@ const WriteContent = () => {
         title: title.trim(),
         content: finalContent,
         excerpt: generateExcerpt(content),
-        author: author.trim(),
         read_time: calculateReadTime(finalContent),
         tags: tags,
       }, contentType);
@@ -167,17 +166,7 @@ const WriteContent = () => {
             </CardHeader>
             
             <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="author">Author Name</Label>
-                  <Input
-                    id="author"
-                    placeholder="Your name"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
+              <div className="space-y-2">
                   <Label htmlFor="tags">Tags</Label>
                   <div className="flex space-x-2">
                     <Input
@@ -205,7 +194,6 @@ const WriteContent = () => {
                     </div>
                   )}
                 </div>
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>

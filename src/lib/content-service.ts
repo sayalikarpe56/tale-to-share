@@ -9,6 +9,15 @@ class ContentService {
       throw new Error("User not authenticated");
     }
 
+    // Get user's full name from profiles table
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('user_id', user.data.user.id)
+      .maybeSingle();
+
+    const authorName = profile?.full_name || 'Anonymous';
+
     const { data: result, error } = await supabase
       .from(type === 'story' ? 'stories' : type === 'article' ? 'articles' : 'news')
       .insert({
@@ -16,7 +25,7 @@ class ContentService {
         title: data.title,
         content: data.content,
         excerpt: data.excerpt,
-        author: data.author,
+        author: authorName,
         tags: data.tags,
         read_time: data.read_time,
       })
