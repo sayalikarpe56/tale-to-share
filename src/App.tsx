@@ -14,6 +14,14 @@ import ContentList from "./pages/ContentList";
 import ContentPost from "./pages/ContentPost";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
+import DMCA from "./pages/DMCA";
+import Help from "./pages/Help";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +49,14 @@ const App = () => (
                 <Route path="/news/:id" element={<ContentPost />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/cookies" element={<Cookies />} />
+                <Route path="/dmca" element={<DMCA />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/feedback" element={<Feedback />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
