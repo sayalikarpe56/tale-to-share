@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/ui/navigation";
 import { blogService } from "@/lib/blog-service";
 import { SocialShare } from "@/components/SocialShare";
+import { SocialActions } from "@/components/SocialActions";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import { format } from "date-fns";
@@ -187,6 +188,16 @@ const BlogPost = () => {
               title={blog.title}
               url={window.location.href}
               excerpt={blog.excerpt}
+            />
+          </div>
+
+          {/* Social Actions */}
+          <div className="mt-8">
+            <SocialActions
+              contentId={blog.id}
+              contentType="blog"
+              title={blog.title}
+              url={window.location.href}
             />
           </div>
 

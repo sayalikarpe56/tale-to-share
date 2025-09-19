@@ -23,11 +23,11 @@ export const Footer = () => {
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                <span>123 Blog Street, Digital City, DC 12345</span>
+                <span>2nd Blog Street, Deolai, Chh.Sambhajinagar - 431010</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>7821973651</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
@@ -43,11 +43,23 @@ export const Footer = () => {
               <Link to="/" className="block text-muted-foreground hover:text-primary transition-colors">
                 Home
               </Link>
+              <Link to="/feed" className="block text-muted-foreground hover:text-primary transition-colors">
+                Feed
+              </Link>
               <Link to="/blogs" className="block text-muted-foreground hover:text-primary transition-colors">
                 All Blogs
               </Link>
+              <Link to="/stories" className="block text-muted-foreground hover:text-primary transition-colors">
+                Stories
+              </Link>
+              <Link to="/articles" className="block text-muted-foreground hover:text-primary transition-colors">
+                Articles
+              </Link>
+              <Link to="/news" className="block text-muted-foreground hover:text-primary transition-colors">
+                News
+              </Link>
               <Link to="/write" className="block text-muted-foreground hover:text-primary transition-colors">
-                Write Blog
+                Write Content
               </Link>
               <Link to="/auth" className="block text-muted-foreground hover:text-primary transition-colors">
                 Sign In

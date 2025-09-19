@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { contentService } from "@/lib/content-service";
 import { Content, ContentType } from "@/types/content";
 import { SocialShare } from "@/components/SocialShare";
+import { SocialActions } from "@/components/SocialActions";
 import { Footer } from "@/components/Footer";
 import { Calendar, Clock, ArrowLeft, User, BookOpen, Newspaper, Feather } from "lucide-react";
 import { format } from "date-fns";
@@ -206,10 +207,19 @@ const ContentPost = () => {
 
             {/* Social Share */}
             <div className="border-t pt-8">
-              <SocialShare 
-                title={content.title}
-                url={window.location.href}
-              />
+        <SocialShare 
+          title={content.title}
+          url={window.location.href}
+        />
+
+        <div className="mt-8">
+          <SocialActions
+            contentId={content.id}
+            contentType={type as string}
+            title={content.title}
+            url={window.location.href}
+          />
+        </div>
             </div>
           </article>
         </div>
