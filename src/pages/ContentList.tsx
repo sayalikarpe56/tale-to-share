@@ -34,14 +34,18 @@ const contentTypeConfig = {
   }
 };
 
-const ContentList = () => {
-  const { type } = useParams<{ type: 'stories' | 'articles' | 'news' }>();
+interface ContentListProps {
+  type?: 'stories' | 'articles' | 'news';
+}
+
+const ContentList = ({ type: propType }: ContentListProps) => {
+  const { type: urlType } = useParams<{ type: 'stories' | 'articles' | 'news' }>();
   const [contents, setContents] = useState<Content[]>([]);
   const [filteredContents, setFilteredContents] = useState<Content[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const contentType = type || 'stories';
+  const contentType = propType || urlType || 'stories';
   const config = contentTypeConfig[contentType];
   const IconComponent = config.icon;
 

@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Edit3, Trash2, Eye, Calendar, BookOpen, Newspaper, Feather } from "lucide-react";
+import { User, Edit3, Trash2, Eye, Calendar, BookOpen, Newspaper, Feather, PenTool } from "lucide-react";
 import { blogService } from "@/lib/blog-service";
 import { contentService } from "@/lib/content-service";
 import { supabase } from "@/integrations/supabase/client";
@@ -217,13 +217,13 @@ const Profile = () => {
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-6xl mx-auto">
           <Tabs defaultValue="overview" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="blogs">Blogs ({userBlogs.length})</TabsTrigger>
-              <TabsTrigger value="stories">Stories ({userStories.length})</TabsTrigger>
-              <TabsTrigger value="articles">Articles ({userArticles.length})</TabsTrigger>
-              <TabsTrigger value="news">News ({userNews.length})</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6 md:grid-cols-3 sm:grid-cols-2">
+              <TabsTrigger value="overview" className="text-xs lg:text-sm">Overview</TabsTrigger>
+              <TabsTrigger value="blogs" className="text-xs lg:text-sm">Blogs ({userBlogs.length})</TabsTrigger>
+              <TabsTrigger value="stories" className="text-xs lg:text-sm">Stories ({userStories.length})</TabsTrigger>
+              <TabsTrigger value="articles" className="text-xs lg:text-sm">Articles ({userArticles.length})</TabsTrigger>
+              <TabsTrigger value="news" className="text-xs lg:text-sm">News ({userNews.length})</TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs lg:text-sm">Settings</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -280,6 +280,222 @@ const Profile = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            <TabsContent value="blogs" className="mt-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    My Blogs ({userBlogs.length})
+                  </CardTitle>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/write">
+                      <PenTool className="w-4 h-4 mr-2" />
+                      Write Blog
+                    </Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {userBlogs.length === 0 ? (
+                    <div className="text-center py-8">
+                      <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-4">No blogs published yet.</p>
+                      <Button asChild variant="hero">
+                        <Link to="/write">Write Your First Blog</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {userBlogs.map((blog) => (
+                        <Link key={blog.id} to={`/blog/${blog.id}`}>
+                          <Card className="hover:shadow-md transition-shadow">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base line-clamp-2">{blog.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{blog.excerpt}</p>
+                              <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                <div className="flex items-center gap-3">
+                                  <span>{format(blog.publishedAt, 'MMM d, yyyy')}</span>
+                                  <span>{blog.readTime} min read</span>
+                                </div>
+                                {blog.tags.length > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {blog.tags[0]}
+                                  </Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="stories" className="mt-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Feather className="w-5 h-5" />
+                    My Stories ({userStories.length})
+                  </CardTitle>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/write/story">
+                      <PenTool className="w-4 h-4 mr-2" />
+                      Write Story
+                    </Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {userStories.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Feather className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-4">No stories published yet.</p>
+                      <Button asChild variant="hero">
+                        <Link to="/write/story">Write Your First Story</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {userStories.map((story) => (
+                        <Link key={story.id} to={`/story/${story.id}`}>
+                          <Card className="hover:shadow-md transition-shadow">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base line-clamp-2">{story.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{story.excerpt}</p>
+                              <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                <div className="flex items-center gap-3">
+                                  <span>{format(story.publishedAt, 'MMM d, yyyy')}</span>
+                                  <span>{story.readTime} min read</span>
+                                </div>
+                                {story.tags.length > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {story.tags[0]}
+                                  </Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="articles" className="mt-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    My Articles ({userArticles.length})
+                  </CardTitle>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/write/article">
+                      <PenTool className="w-4 h-4 mr-2" />
+                      Write Article
+                    </Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {userArticles.length === 0 ? (
+                    <div className="text-center py-8">
+                      <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-4">No articles published yet.</p>
+                      <Button asChild variant="hero">
+                        <Link to="/write/article">Write Your First Article</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {userArticles.map((article) => (
+                        <Link key={article.id} to={`/article/${article.id}`}>
+                          <Card className="hover:shadow-md transition-shadow">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base line-clamp-2">{article.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{article.excerpt}</p>
+                              <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                <div className="flex items-center gap-3">
+                                  <span>{format(article.publishedAt, 'MMM d, yyyy')}</span>
+                                  <span>{article.readTime} min read</span>
+                                </div>
+                                {article.tags.length > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {article.tags[0]}
+                                  </Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="news" className="mt-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Newspaper className="w-5 h-5" />
+                    My News ({userNews.length})
+                  </CardTitle>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/write/news">
+                      <PenTool className="w-4 h-4 mr-2" />
+                      Write News
+                    </Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {userNews.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-4">No news published yet.</p>
+                      <Button asChild variant="hero">
+                        <Link to="/write/news">Write Your First News</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {userNews.map((news) => (
+                        <Link key={news.id} to={`/news/${news.id}`}>
+                          <Card className="hover:shadow-md transition-shadow">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-base line-clamp-2">{news.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{news.excerpt}</p>
+                              <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                <div className="flex items-center gap-3">
+                                  <span>{format(news.publishedAt, 'MMM d, yyyy')}</span>
+                                  <span>{news.readTime} min read</span>
+                                </div>
+                                {news.tags.length > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {news.tags[0]}
+                                  </Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="settings" className="space-y-6">

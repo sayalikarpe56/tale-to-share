@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Footer } from "@/components/Footer";
-import Home from "./pages/Index";
+import Home from "./pages/Home";
 import BlogList from "./pages/BlogList";
 import WriteBlog from "./pages/WriteBlog";
 import WriteContent from "./pages/WriteContent";
@@ -40,9 +40,9 @@ const App = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/feed" element={<Feed />} />
                 <Route path="/blogs" element={<BlogList />} />
-                <Route path="/stories" element={<ContentList />} />
-                <Route path="/articles" element={<ContentList />} />
-                <Route path="/news" element={<ContentList />} />
+                <Route path="/stories" element={<ContentList type="stories" />} />
+                <Route path="/articles" element={<ContentList type="articles" />} />
+                <Route path="/news" element={<ContentList type="news" />} />
                 <Route path="/write" element={<WriteBlog />} />
                 <Route path="/write/:type" element={<WriteContent />} />
                 <Route path="/blog/:id" element={<BlogPost />} />

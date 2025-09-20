@@ -35,7 +35,7 @@ export const Navigation = () => {
             <PenTool className="w-4 h-4 text-primary-foreground" />
           </div>
           <span className="font-bold text-xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            BlogCraft
+            TrendInk
           </span>
         </Link>
 
