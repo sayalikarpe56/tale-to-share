@@ -107,6 +107,29 @@ const WriteContent = () => {
     setIsPublishing(true);
     
     try {
+      // Check for copyright
+      const copyrightCheck = await fetch(
+        `https://orgxiugqbqacdhneyrxi.supabase.co/functions/v1/check-copyright`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: content.trim(), title: title.trim() })
+        }
+      );
+      
+      if (copyrightCheck.ok) {
+        const copyrightResult = await copyrightCheck.json();
+        if (copyrightResult.isCopyrighted && copyrightResult.confidence > 0.7) {
+          toast({
+            title: "Potential Copyright Issue",
+            description: `${copyrightResult.reason}\n\nSuggestion: ${copyrightResult.suggestions}`,
+            variant: "destructive",
+          });
+          setIsPublishing(false);
+          return;
+        }
+      }
+      
       // Add images to content if any are uploaded
       let finalContent = content.trim();
       if (images.length > 0) {
