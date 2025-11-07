@@ -598,7 +598,11 @@ const Profile = () => {
                   ) : (
                     <div className="space-y-4">
                       {followers.map((follower) => (
-                        <div key={follower.id} className="flex items-center gap-3 p-4 border rounded-lg">
+                        <Link 
+                          key={follower.id} 
+                          to={`/profile/${follower.follower_id}`}
+                          className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
                           <Avatar>
                             <AvatarImage src={follower.follower?.avatar_url} />
                             <AvatarFallback>
@@ -611,7 +615,7 @@ const Profile = () => {
                               <p className="text-sm text-muted-foreground">@{follower.follower.username}</p>
                             )}
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -630,7 +634,11 @@ const Profile = () => {
                   ) : (
                     <div className="space-y-4">
                       {following.map((follow) => (
-                        <div key={follow.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <Link 
+                          key={follow.id} 
+                          to={`/profile/${follow.following_id}`}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
                           <div className="flex items-center gap-3">
                             <Avatar>
                               <AvatarImage src={follow.following?.avatar_url} />
@@ -648,15 +656,18 @@ const Profile = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => connectionService.unfollowUser(follow.following_id).then(() => {
-                              sonnerToast.success("Unfollowed successfully");
-                              fetchConnections();
-                            })}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              connectionService.unfollowUser(follow.following_id).then(() => {
+                                sonnerToast.success("Unfollowed successfully");
+                                fetchConnections();
+                              });
+                            }}
                           >
                             <UserMinus className="h-4 w-4 mr-1" />
                             Unfollow
                           </Button>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )}

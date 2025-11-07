@@ -14,6 +14,7 @@ import ContentList from "./pages/ContentList";
 import ContentPost from "./pages/ContentPost";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import PublicProfile from "./pages/PublicProfile";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
@@ -51,6 +52,7 @@ const App = () => (
                 <Route path="/news/:id" element={<ContentPost />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:userId" element={<PublicProfile />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/cookies" element={<Cookies />} />

@@ -128,6 +128,14 @@ const Home = () => {
                 Write Your First Post
               </Link>
             </Button>
+            
+            {/* Made in India Badge */}
+            <div className="pt-8 flex justify-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-green-500/10 border border-orange-500/20">
+                <span className="text-2xl">🇮🇳</span>
+                <span className="font-semibold text-sm">Made with ❤️ in India</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
