@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Edit3, Trash2, Eye, Calendar, BookOpen, Newspaper, Feather, PenTool } from "lucide-react";
+import { User, Edit3, Trash2, Eye, Calendar, BookOpen, Newspaper, Feather, PenTool, UserPlus, UserMinus, Check, X } from "lucide-react";
+import { connectionService, Connection } from "@/lib/connection-service";
+import { toast as sonnerToast } from "sonner";
 import { blogService } from "@/lib/blog-service";
 import { contentService } from "@/lib/content-service";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +42,9 @@ const Profile = () => {
   const [userNews, setUserNews] = useState<Content[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [followers, setFollowers] = useState<Connection[]>([]);
+  const [following, setFollowing] = useState<Connection[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
   const [formData, setFormData] = useState({
     full_name: "",
     username: "",
@@ -50,6 +55,7 @@ const Profile = () => {
     if (user) {
       fetchProfile();
       fetchUserContent();
+      fetchConnections();
     }
   }, [user]);
 
@@ -130,6 +136,40 @@ const Profile = () => {
         description: "Failed to load your content.",
         variant: "destructive",
       });
+    }
+  };
+
+  const fetchConnections = async () => {
+    if (!user) return;
+
+    const [followersData, followingData, pendingData] = await Promise.all([
+      connectionService.getFollowers(user.id),
+      connectionService.getFollowing(user.id),
+      connectionService.getPendingRequests()
+    ]);
+
+    setFollowers(followersData);
+    setFollowing(followingData);
+    setPendingRequests(pendingData);
+  };
+
+  const handleAcceptRequest = async (connectionId: string) => {
+    try {
+      await connectionService.acceptFollowRequest(connectionId);
+      sonnerToast.success("Follow request accepted!");
+      fetchConnections();
+    } catch (error) {
+      sonnerToast.error("Failed to accept request");
+    }
+  };
+
+  const handleRejectRequest = async (connectionId: string) => {
+    try {
+      await connectionService.rejectFollowRequest(connectionId);
+      sonnerToast.success("Follow request rejected");
+      fetchConnections();
+    } catch (error) {
+      sonnerToast.error("Failed to reject request");
     }
   };
 
@@ -217,12 +257,14 @@ const Profile = () => {
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-6xl mx-auto">
           <Tabs defaultValue="overview" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6 md:grid-cols-3 sm:grid-cols-2">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 md:grid-cols-4 sm:grid-cols-2">
               <TabsTrigger value="overview" className="text-xs lg:text-sm">Overview</TabsTrigger>
               <TabsTrigger value="blogs" className="text-xs lg:text-sm">Blogs ({userBlogs.length})</TabsTrigger>
               <TabsTrigger value="stories" className="text-xs lg:text-sm">Stories ({userStories.length})</TabsTrigger>
               <TabsTrigger value="articles" className="text-xs lg:text-sm">Articles ({userArticles.length})</TabsTrigger>
               <TabsTrigger value="news" className="text-xs lg:text-sm">News ({userNews.length})</TabsTrigger>
+              <TabsTrigger value="followers" className="text-xs lg:text-sm">Followers ({followers.length})</TabsTrigger>
+              <TabsTrigger value="following" className="text-xs lg:text-sm">Following ({following.length})</TabsTrigger>
               <TabsTrigger value="settings" className="text-xs lg:text-sm">Settings</TabsTrigger>
             </TabsList>
 
@@ -491,6 +533,130 @@ const Profile = () => {
                             </CardContent>
                           </Card>
                         </Link>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="followers" className="space-y-6">
+              {pendingRequests.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pending Follow Requests</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {pendingRequests.map((request) => (
+                        <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={request.follower?.avatar_url} />
+                              <AvatarFallback>
+                                {request.follower?.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{request.follower?.full_name}</p>
+                              {request.follower?.username && (
+                                <p className="text-sm text-muted-foreground">@{request.follower.username}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleAcceptRequest(request.id)}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRejectRequest(request.id)}
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Followers</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {followers.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No followers yet</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {followers.map((follower) => (
+                        <div key={follower.id} className="flex items-center gap-3 p-4 border rounded-lg">
+                          <Avatar>
+                            <AvatarImage src={follower.follower?.avatar_url} />
+                            <AvatarFallback>
+                              {follower.follower?.full_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{follower.follower?.full_name}</p>
+                            {follower.follower?.username && (
+                              <p className="text-sm text-muted-foreground">@{follower.follower.username}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="following" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Following</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {following.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">Not following anyone yet</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {following.map((follow) => (
+                        <div key={follow.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={follow.following?.avatar_url} />
+                              <AvatarFallback>
+                                {follow.following?.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{follow.following?.full_name}</p>
+                              {follow.following?.username && (
+                                <p className="text-sm text-muted-foreground">@{follow.following.username}</p>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => connectionService.unfollowUser(follow.following_id).then(() => {
+                              sonnerToast.success("Unfollowed successfully");
+                              fetchConnections();
+                            })}
+                          >
+                            <UserMinus className="h-4 w-4 mr-1" />
+                            Unfollow
+                          </Button>
+                        </div>
                       ))}
                     </div>
                   )}
